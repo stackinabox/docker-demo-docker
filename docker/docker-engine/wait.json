@@ -1,0 +1,65 @@
+{
+    "name": "wait",
+    "component": "docker-engine",
+    "description": "",
+    "defaultWorkingDir": "${p:resource\/work.dir}\/${p:component.name}",
+    "takesVersion": false,
+    "status": "",
+    "active": true,
+    "path": "components\/f7680085-83db-4450-a057-91ec27ace08f\/processes\/8cb62b1a-f9e9-4ce2-aa97-e4ee9e4b98c3",
+    "propDefs": [],
+    "rootActivity": {
+        "edges": [
+            {
+                "to": "Wait",
+                "type": "ALWAYS",
+                "value": ""
+            },
+            {
+                "to": "0e91c52ef303c3c2641f32d9afebb1",
+                "from": "Wait",
+                "type": "SUCCESS",
+                "value": ""
+            }
+        ],
+        "offsets": [
+            {
+                "name": "0e91c52ef303c3c2641f32d9afebb1",
+                "x": -5,
+                "y": 350,
+                "h": 80,
+                "w": 120
+            },
+            {
+                "name": "Wait",
+                "x": -25,
+                "y": 180,
+                "h": 70,
+                "w": 160
+            }
+        ],
+        "layoutMode": "auto",
+        "type": "graph",
+        "name": "361be4f6-61ef-4ef3-b8e7-ed2b4fa23fbb",
+        "children": [
+            {
+                "type": "finish",
+                "name": "0e91c52ef303c3c2641f32d9afebb1",
+                "children": []
+            },
+            {
+                "allowFailure": false,
+                "useImpersonation": false,
+                "showHidden": false,
+                "impersonationUseSudo": false,
+                "commandName": "Wait",
+                "pluginName": "General Utilities",
+                "pluginVersion": 1,
+                "properties": {"duration": "120"},
+                "type": "plugin",
+                "name": "Wait",
+                "children": []
+            }
+        ]
+    }
+}

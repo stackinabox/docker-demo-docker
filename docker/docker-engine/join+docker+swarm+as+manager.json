@@ -1,0 +1,71 @@
+{
+    "name": "join docker swarm as manager",
+    "component": "docker-engine",
+    "description": "",
+    "defaultWorkingDir": "${p:resource\/work.dir}\/${p:component.name}",
+    "takesVersion": false,
+    "status": "Active",
+    "active": true,
+    "path": "components\/f7680085-83db-4450-a057-91ec27ace08f\/processes\/eba227bf-4311-4137-9017-3c827e8881f6",
+    "propDefs": [],
+    "rootActivity": {
+        "edges": [
+            {
+                "to": "join swarm as manager node",
+                "type": "ALWAYS",
+                "value": ""
+            },
+            {
+                "to": "0be3cc89f8bf12d92318e8ea78f9a6",
+                "from": "join swarm as manager node",
+                "type": "SUCCESS",
+                "value": ""
+            }
+        ],
+        "offsets": [
+            {
+                "name": "0be3cc89f8bf12d92318e8ea78f9a6",
+                "x": -5,
+                "y": 420,
+                "h": 80,
+                "w": 120
+            },
+            {
+                "name": "join swarm as manager node",
+                "x": -85.00000000000003,
+                "y": 200,
+                "h": 70,
+                "w": 280
+            }
+        ],
+        "layoutMode": "unknown",
+        "type": "graph",
+        "name": "73feee3e-fc2b-4abd-a82e-59cec7b439ed",
+        "children": [
+            {
+                "type": "finish",
+                "name": "0be3cc89f8bf12d92318e8ea78f9a6",
+                "children": []
+            },
+            {
+                "allowFailure": false,
+                "useImpersonation": false,
+                "showHidden": false,
+                "impersonationUseSudo": false,
+                "commandName": "Shell",
+                "pluginName": "Shell",
+                "pluginVersion": 7,
+                "properties": {
+                    "directoryOffset": ".",
+                    "shellInterpreter": "",
+                    "scriptBody": "#!\/bin\/bash\n\ndocker swarm join \\\n    --token ${p:environment\/swarm-manager-token} \\\n    ${p:environment\/swarm-master-ip}",
+                    "runAsDaemon": "false",
+                    "outputFile": ""
+                },
+                "type": "plugin",
+                "name": "join swarm as manager node",
+                "children": []
+            }
+        ]
+    }
+}

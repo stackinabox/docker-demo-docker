@@ -1,0 +1,71 @@
+{
+    "name": "join docker swarm as worker",
+    "component": "docker-engine",
+    "description": "",
+    "defaultWorkingDir": "${p:resource\/work.dir}\/${p:component.name}",
+    "takesVersion": false,
+    "status": "",
+    "active": true,
+    "path": "components\/f7680085-83db-4450-a057-91ec27ace08f\/processes\/6e2ccae9-ca08-4740-b060-022e142a07c5",
+    "propDefs": [],
+    "rootActivity": {
+        "edges": [
+            {
+                "to": "aeb8395d06a453ef6b88cec8030467",
+                "from": "join docker swarm as worker",
+                "type": "SUCCESS",
+                "value": ""
+            },
+            {
+                "to": "join docker swarm as worker",
+                "type": "ALWAYS",
+                "value": ""
+            }
+        ],
+        "offsets": [
+            {
+                "name": "aeb8395d06a453ef6b88cec8030467",
+                "x": -5,
+                "y": 420,
+                "h": 80,
+                "w": 120
+            },
+            {
+                "name": "join docker swarm as worker",
+                "x": -85.00000000000003,
+                "y": 220,
+                "h": 70,
+                "w": 280
+            }
+        ],
+        "layoutMode": "unknown",
+        "type": "graph",
+        "name": "28f5cacb-96c7-4ad2-9141-3ac533a4bc0f",
+        "children": [
+            {
+                "type": "finish",
+                "name": "aeb8395d06a453ef6b88cec8030467",
+                "children": []
+            },
+            {
+                "allowFailure": false,
+                "useImpersonation": false,
+                "showHidden": false,
+                "impersonationUseSudo": false,
+                "commandName": "Shell",
+                "pluginName": "Shell",
+                "pluginVersion": 7,
+                "properties": {
+                    "directoryOffset": ".",
+                    "shellInterpreter": "",
+                    "scriptBody": "#!\/bin\/bash\n\ndocker swarm join \\\n    --token ${p:environment\/swarm-worker-token} \\\n    ${p:environment\/swarm-master-ip}",
+                    "runAsDaemon": "false",
+                    "outputFile": ""
+                },
+                "type": "plugin",
+                "name": "join docker swarm as worker",
+                "children": []
+            }
+        ]
+    }
+}

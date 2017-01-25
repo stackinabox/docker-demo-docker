@@ -1,0 +1,5 @@
+{
+    "name": "docker-swarm",
+    "description": "",
+    "enforceCompleteSnapshots": false
+}

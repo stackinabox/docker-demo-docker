@@ -1,0 +1,248 @@
+{
+    "name": "create new docker swarm",
+    "component": "docker-engine",
+    "description": "",
+    "defaultWorkingDir": "${p:resource\/work.dir}\/${p:component.name}",
+    "takesVersion": false,
+    "inventoryActionType": "ADD",
+    "status": "Active",
+    "configActionType": "ADD",
+    "active": true,
+    "path": "components\/f7680085-83db-4450-a057-91ec27ace08f\/processes\/4b72d480-14df-49df-84f6-38128ea90167",
+    "propDefs": [],
+    "rootActivity": {
+        "edges": [
+            {
+                "to": "Set Swarm Advertised IP",
+                "from": "init docker swarm",
+                "type": "SUCCESS",
+                "value": ""
+            },
+            {
+                "to": "init docker swarm",
+                "type": "ALWAYS",
+                "value": ""
+            },
+            {
+                "to": "Get Manager Token",
+                "from": "Set Swarm Advertised IP",
+                "type": "SUCCESS",
+                "value": ""
+            },
+            {
+                "to": "Set Swarm Manager Token",
+                "from": "Get Manager Token",
+                "type": "SUCCESS",
+                "value": ""
+            },
+            {
+                "to": "Set Swarm Worker Token",
+                "from": "Get Worker Token",
+                "type": "SUCCESS",
+                "value": ""
+            },
+            {
+                "to": "346d75c49c4fe932eab03f81609d02",
+                "from": "Set Swarm Worker Token",
+                "type": "SUCCESS",
+                "value": ""
+            },
+            {
+                "to": "Get Worker Token",
+                "from": "Set Swarm Manager Token",
+                "type": "SUCCESS",
+                "value": ""
+            }
+        ],
+        "offsets": [
+            {
+                "name": "Get Worker Token",
+                "x": -53.33333333333326,
+                "y": 632.5581395348837,
+                "h": 80,
+                "w": 240
+            },
+            {
+                "name": "Get Manager Token",
+                "x": -53.333333333333314,
+                "y": 396.51162790697674,
+                "h": 80,
+                "w": 260
+            },
+            {
+                "name": "Set Swarm Worker Token",
+                "x": -138.33333333333326,
+                "y": 746.5116279069767,
+                "h": 80,
+                "w": 460
+            },
+            {
+                "name": "init docker swarm",
+                "x": -50,
+                "y": 130,
+                "h": 80,
+                "w": 240
+            },
+            {
+                "name": "Set Swarm Advertised IP",
+                "x": -133.33333333333331,
+                "y": 250,
+                "h": 80,
+                "w": 460
+            },
+            {
+                "name": "346d75c49c4fe932eab03f81609d02",
+                "x": -5.000000000000085,
+                "y": 920,
+                "h": 90,
+                "w": 130
+            },
+            {
+                "name": "Set Swarm Manager Token",
+                "x": -133.33333333333326,
+                "y": 520,
+                "h": 80,
+                "w": 460
+            }
+        ],
+        "layoutMode": "manual",
+        "type": "graph",
+        "name": "c07dcd3d-9bea-4775-95fe-2a28a8cfe8e0",
+        "children": [
+            {
+                "type": "finish",
+                "name": "346d75c49c4fe932eab03f81609d02",
+                "children": []
+            },
+            {
+                "allowFailure": false,
+                "useImpersonation": false,
+                "showHidden": false,
+                "impersonationUseSudo": false,
+                "commandName": "Shell",
+                "pluginName": "Shell",
+                "pluginVersion": 7,
+                "properties": {
+                    "directoryOffset": ".",
+                    "shellInterpreter": "",
+                    "scriptBody": "#!\/bin\/bash\n\nNAME=$(echo \"$(hostname)\" | tr '[:lower:]' '[:upper:]')\n\/usr\/bin\/openssl req -new -newkey rsa:2048 -days 3650 -nodes -x509 -subj \"\/C=US\/ST=SC\/L=GREENVILLE\/O=STACKINABOX.IO\/CN=$NAME\" -keyout ca-key.pem -out ca.pem \n\/usr\/bin\/openssl genrsa -out server-key.pem 2048 \n\/usr\/bin\/openssl req -subj \"\/CN=$NAME\" -new -key server-key.pem -out server.csr \n\/usr\/bin\/openssl x509 -req -days 3650 -in server.csr -CA ca.pem -CAkey ca-key.pem -CAcreateserial -out server-cert.pem \n\/usr\/bin\/openssl genrsa -out key.pem 2048 \n\/usr\/bin\/openssl req -subj '\/CN=OPENSTACK' -new -key key.pem -out client.csr \necho extendedKeyUsage = clientAuth > extfile.cnf \n\/usr\/bin\/openssl x509 -req -days 3650 -in client.csr -CA ca.pem -CAkey ca-key.pem -CAcreateserial -out cert.pem -extfile extfile.cnf \n\nmkdir -pv \/home\/ubuntu\/.docker\ncp -v {ca,cert,key}.pem \/home\/ubuntu\/.docker\ncat > \/home\/ubuntu\/.docker\/dockerc <<'EOF'\nexport DOCKER_HOST=tcp:\/\/${p:environment\/public_hostname}:2376\nexport DOCKER_TLS_VERIFY=1\nEOF\n\n# add script for setting up \/etc\/hosts file on client\ncat > \/home\/ubuntu\/.docker\/setup_hosts.sh <<'EOF'\n#!\/bin\/bash\n\nsudo bash -c \"echo '${p:environment\/public_ip}        ${p:environment\/public_hostname}.stackinabox.io ${p:environment\/public_hostname}' >> \/etc\/hosts\"\nEOF\n\nchown -R ubuntu:ubuntu \/home\/ubuntu\/.docker\nchmod +x \/home\/ubuntu\/.docker\/setup_hosts.sh\n\ntar -C \/home\/ubuntu -zcvf \/home\/ubuntu\/client_bundle.tgz .docker\n\n# client's will need to run the following before executing docker commands against the swarm\n# scp -i %ssh_key% ubuntu@%public_ip%:~\/client_bundle.tgz ~\/ \n# bash ~\/.docker\/setup_hosts.sh\n# source ~\/.docker\/dockerc\n\n# expose insecure tcp port and insecure private registry\nSTART_CMD=\"\/usr\/bin\/dockerd -D --tlsverify --tlscacert=${p:resource\/work.dir}${p:component.name}\/ca.pem --tlscert=${p:resource\/work.dir}${p:component.name}\/server-cert.pem --tlskey=${p:resource\/work.dir}${p:component.name}\/server-key.pem -H fd:\/\/ -H tcp:\/\/0.0.0.0:2376 --insecure-registry 192.168.27.100:5555\"\n\n# START_CMD=\"\/usr\/bin\/dockerd -d -H fd:\/\/ -H tcp:\/\/0.0.0.0:2375 --insecure-registry 192.168.27.100:5555\"\nsed -i \"s,^\\(ExecStart=\\).*,\\1$START_CMD,\" \/lib\/systemd\/system\/docker.service\nsystemctl daemon-reload\nsystemctl restart docker.service\n\nsleep 20\n\n# SWRM_ADV_ADDR=\"$(ifconfig eth0 | grep 'inet addr:' | cut -d: -f2 | awk '{ print $1}'):2375\"\ndocker swarm init --advertise-addr ${p:agent\/ip}",
+                    "runAsDaemon": "false",
+                    "outputFile": ""
+                },
+                "type": "plugin",
+                "name": "init docker swarm",
+                "children": []
+            },
+            {
+                "allowFailure": false,
+                "useImpersonation": false,
+                "showHidden": false,
+                "impersonationUseSudo": false,
+                "commandName": "Set Component Environment Property",
+                "pluginName": "IBM UrbanCode Deploy Environments",
+                "pluginVersion": 72,
+                "properties": {
+                    "component": "${p:component.id}",
+                    "environment": "${p:environment.id}",
+                    "application": "${p:application.id}",
+                    "name": "swarm-master-ip",
+                    "value": "${p:agent\/ip}",
+                    "isSecure": "false"
+                },
+                "type": "plugin",
+                "name": "Set Swarm Advertised IP",
+                "children": []
+            },
+            {
+                "allowFailure": false,
+                "useImpersonation": false,
+                "showHidden": false,
+                "impersonationUseSudo": false,
+                "postProcessingScript": {
+                    "id": "eddaa1bf-69f9-425c-810e-c84e30c62cd9",
+                    "name": "output",
+                    "description": "",
+                    "body": "var exit = properties.get('exitCode');\n\nscanner.register(\"SWMTKN\", function(lineNumber, line) {\n     properties.put('token', line);\n});\n\nscanner.scan();\n\nif (exit == 0) {\n    properties.put('Status', 'Success');\n}\nelse {\n     properties.put('Status', 'Failure');\n}\n"
+                },
+                "commandName": "Shell",
+                "pluginName": "Shell",
+                "pluginVersion": 7,
+                "properties": {
+                    "directoryOffset": ".",
+                    "shellInterpreter": "",
+                    "scriptBody": "#!\/bin\/bash\n\ndocker swarm join-token --quiet manager",
+                    "runAsDaemon": "false",
+                    "outputFile": ""
+                },
+                "type": "plugin",
+                "name": "Get Manager Token",
+                "children": []
+            },
+            {
+                "allowFailure": false,
+                "useImpersonation": false,
+                "showHidden": false,
+                "impersonationUseSudo": false,
+                "commandName": "Set Component Environment Property",
+                "pluginName": "IBM UrbanCode Deploy Environments",
+                "pluginVersion": 72,
+                "properties": {
+                    "component": "${p:component.id}",
+                    "environment": "${p:environment.id}",
+                    "application": "${p:application.id}",
+                    "name": "swarm-manager-token",
+                    "value": "${p:Get Manager Token\/token}",
+                    "isSecure": "false"
+                },
+                "type": "plugin",
+                "name": "Set Swarm Manager Token",
+                "children": []
+            },
+            {
+                "allowFailure": false,
+                "useImpersonation": false,
+                "showHidden": false,
+                "impersonationUseSudo": false,
+                "postProcessingScript": {
+                    "id": "eddaa1bf-69f9-425c-810e-c84e30c62cd9",
+                    "name": "output",
+                    "description": "",
+                    "body": "var exit = properties.get('exitCode');\n\nscanner.register(\"SWMTKN\", function(lineNumber, line) {\n     properties.put('token', line);\n});\n\nscanner.scan();\n\nif (exit == 0) {\n    properties.put('Status', 'Success');\n}\nelse {\n     properties.put('Status', 'Failure');\n}\n"
+                },
+                "commandName": "Shell",
+                "pluginName": "Shell",
+                "pluginVersion": 7,
+                "properties": {
+                    "directoryOffset": ".",
+                    "shellInterpreter": "",
+                    "scriptBody": "#!\/bin\/bash\n\ndocker swarm join-token --quiet worker",
+                    "runAsDaemon": "false",
+                    "outputFile": ""
+                },
+                "type": "plugin",
+                "name": "Get Worker Token",
+                "children": []
+            },
+            {
+                "allowFailure": false,
+                "useImpersonation": false,
+                "showHidden": false,
+                "impersonationUseSudo": false,
+                "commandName": "Set Component Environment Property",
+                "pluginName": "IBM UrbanCode Deploy Environments",
+                "pluginVersion": 72,
+                "properties": {
+                    "component": "${p:component.id}",
+                    "environment": "${p:environment.id}",
+                    "application": "${p:application.id}",
+                    "name": "swarm-worker-token",
+                    "value": "${p:Get Worker Token\/token}",
+                    "isSecure": "false"
+                },
+                "type": "plugin",
+                "name": "Set Swarm Worker Token",
+                "children": []
+            }
+        ]
+    }
+}
