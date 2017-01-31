@@ -1,0 +1,71 @@
+{
+    "name": "create swarm worker",
+    "component": "docker",
+    "description": "",
+    "defaultWorkingDir": "${p:resource\/work.dir}\/${p:component.name}",
+    "takesVersion": false,
+    "status": "Active",
+    "active": true,
+    "path": "components\/8855d042-6bae-4886-a1ae-f3dbf19f41ee\/processes\/2b38eb59-26e9-4a9c-88f3-36777fe0d6c4",
+    "propDefs": [],
+    "rootActivity": {
+        "edges": [
+            {
+                "to": "join docker swarm as worker",
+                "type": "ALWAYS",
+                "value": ""
+            },
+            {
+                "to": "aeb8395d06a453ef6b88cec8030467",
+                "from": "join docker swarm as worker",
+                "type": "SUCCESS",
+                "value": ""
+            }
+        ],
+        "offsets": [
+            {
+                "name": "join docker swarm as worker",
+                "x": -85.00000000000003,
+                "y": 220,
+                "h": 70,
+                "w": 280
+            },
+            {
+                "name": "aeb8395d06a453ef6b88cec8030467",
+                "x": -5,
+                "y": 420,
+                "h": 80,
+                "w": 120
+            }
+        ],
+        "layoutMode": "manual",
+        "type": "graph",
+        "name": "dcc9ae60-c046-47a2-95cd-003b6f8fabb5",
+        "children": [
+            {
+                "type": "finish",
+                "name": "aeb8395d06a453ef6b88cec8030467",
+                "children": []
+            },
+            {
+                "allowFailure": false,
+                "useImpersonation": false,
+                "showHidden": false,
+                "impersonationUseSudo": false,
+                "commandName": "Shell",
+                "pluginName": "Shell",
+                "pluginVersion": 7,
+                "properties": {
+                    "directoryOffset": ".",
+                    "shellInterpreter": "",
+                    "scriptBody": "#!\/bin\/bash\n    \ndocker run -d swarm join --advertise=${p:agent\/ip}:2375 consul:\/\/${p:environment\/consul-ip}:8500",
+                    "runAsDaemon": "false",
+                    "outputFile": ""
+                },
+                "type": "plugin",
+                "name": "join docker swarm as worker",
+                "children": []
+            }
+        ]
+    }
+}

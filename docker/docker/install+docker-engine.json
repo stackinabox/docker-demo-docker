@@ -1,0 +1,73 @@
+{
+    "name": "install docker-engine",
+    "component": "docker",
+    "description": "",
+    "defaultWorkingDir": "${p:resource\/work.dir}\/${p:component.name}",
+    "takesVersion": true,
+    "inventoryActionType": "ADD",
+    "status": "Active",
+    "configActionType": "ADD",
+    "active": true,
+    "path": "components\/8855d042-6bae-4886-a1ae-f3dbf19f41ee\/processes\/52590e53-bb54-467f-baed-16c79738ef2c",
+    "propDefs": [],
+    "rootActivity": {
+        "edges": [
+            {
+                "to": "Install Docker Engine daemon",
+                "type": "ALWAYS",
+                "value": ""
+            },
+            {
+                "to": "bc534492fcb8ba410f2e754b593585",
+                "from": "Install Docker Engine daemon",
+                "type": "SUCCESS",
+                "value": ""
+            }
+        ],
+        "offsets": [
+            {
+                "name": "bc534492fcb8ba410f2e754b593585",
+                "x": -5,
+                "y": 420,
+                "h": 80,
+                "w": 120
+            },
+            {
+                "name": "Install Docker Engine daemon",
+                "x": -90,
+                "y": 188.93617021276597,
+                "h": 70,
+                "w": 290
+            }
+        ],
+        "layoutMode": "manual",
+        "type": "graph",
+        "name": "911a5820-50c3-4cb8-ad51-4b0cde2b1797",
+        "children": [
+            {
+                "type": "finish",
+                "name": "bc534492fcb8ba410f2e754b593585",
+                "children": []
+            },
+            {
+                "allowFailure": false,
+                "useImpersonation": false,
+                "showHidden": false,
+                "impersonationUseSudo": false,
+                "commandName": "Shell",
+                "pluginName": "Shell",
+                "pluginVersion": 7,
+                "properties": {
+                    "directoryOffset": ".",
+                    "shellInterpreter": "",
+                    "scriptBody": "#!\/bin\/bash\n\nset -e\n\n# Update host configuration\nNAME=$(hostname)\ncat > \/etc\/hosts <<EOF\n127.0.0.1         localhost\n${p:agent\/ip}     $NAME.stackinabox.io $NAME\nEOF\n\nsudo apt-get update\nsudo apt-get upgrade -y\nwget -qO- https:\/\/get.docker.com\/ | sh\n# use below to install CS Engine\n# https:\/\/packages.docker.com\/${p:version.name}\/install.sh\n\n# expose insecure tcp port and insecure private registry\nSTART_CMD=\"\/usr\/bin\/dockerd -D -H fd:\/\/ -H tcp:\/\/0.0.0.0:2375 --insecure-registry 192.168.27.100:5555\"\n\nsed -i \"s,^\\(ExecStart=\\).*,\\1$START_CMD,\" \/lib\/systemd\/system\/docker.service\nsystemctl daemon-reload\nsystemctl restart docker.service\n\n# add ubuntu user to docker group\nsudo usermod -aG docker ubuntu",
+                    "runAsDaemon": "false",
+                    "outputFile": ""
+                },
+                "type": "plugin",
+                "name": "Install Docker Engine daemon",
+                "children": []
+            }
+        ]
+    }
+}

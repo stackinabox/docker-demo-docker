@@ -1,0 +1,104 @@
+{
+    "name": "create swarm manager",
+    "component": "docker",
+    "description": "",
+    "defaultWorkingDir": "${p:resource\/work.dir}\/${p:component.name}",
+    "takesVersion": false,
+    "status": "Active",
+    "active": true,
+    "path": "components\/8855d042-6bae-4886-a1ae-f3dbf19f41ee\/processes\/3eff16c0-9925-4d5e-b8d0-5ad18f2b108d",
+    "propDefs": [],
+    "rootActivity": {
+        "edges": [
+            {
+                "to": "create new docker swarm",
+                "type": "ALWAYS",
+                "value": ""
+            },
+            {
+                "to": "set swarm manager advertise address",
+                "from": "create new docker swarm",
+                "type": "SUCCESS",
+                "value": ""
+            },
+            {
+                "to": "ddf635849f255e7cf19fc480ec31e3",
+                "from": "set swarm manager advertise address",
+                "type": "SUCCESS",
+                "value": ""
+            }
+        ],
+        "offsets": [
+            {
+                "name": "ddf635849f255e7cf19fc480ec31e3",
+                "x": -5,
+                "y": 420,
+                "h": 80,
+                "w": 120
+            },
+            {
+                "name": "set swarm manager advertise address",
+                "x": -134.99999999999994,
+                "y": 310,
+                "h": 70,
+                "w": 380
+            },
+            {
+                "name": "create new docker swarm",
+                "x": -74.99999999999997,
+                "y": 200.00000000000003,
+                "h": 70,
+                "w": 260
+            }
+        ],
+        "layoutMode": "manual",
+        "type": "graph",
+        "name": "5fa935c9-fb18-4a98-ad60-bf3c58c0ee30",
+        "children": [
+            {
+                "type": "finish",
+                "name": "ddf635849f255e7cf19fc480ec31e3",
+                "children": []
+            },
+            {
+                "allowFailure": false,
+                "useImpersonation": false,
+                "showHidden": false,
+                "impersonationUseSudo": false,
+                "commandName": "Shell",
+                "pluginName": "Shell",
+                "pluginVersion": 7,
+                "properties": {
+                    "directoryOffset": ".",
+                    "shellInterpreter": "",
+                    "scriptBody": "#!\/bin\/bash\n\ndocker run -d -p 4000:4000 swarm manage -H :4000 --replication --advertise ${p:agent\/ip}:4000 consul:\/\/${p:environment\/consul-ip}:8500",
+                    "runAsDaemon": "false",
+                    "outputFile": ""
+                },
+                "type": "plugin",
+                "name": "create new docker swarm",
+                "children": []
+            },
+            {
+                "allowFailure": false,
+                "useImpersonation": false,
+                "showHidden": false,
+                "impersonationUseSudo": false,
+                "commandName": "Set Component Environment Property",
+                "pluginName": "IBM UrbanCode Deploy Environments",
+                "pluginVersion": 72,
+                "properties": {
+                    "component": "${p:component.id}",
+                    "environment": "${p:environment.id}",
+                    "application": "${p:application.id}",
+                    "name": "swarm-manager-ip",
+                    "value": "${p:agent\/ip}",
+                    "isSecure": "false"
+                },
+                "type": "plugin",
+                "name": "set swarm manager advertise address",
+                "children": []
+            }
+        ]
+    }
+}

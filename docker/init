@@ -1,7 +1,10 @@
 #!/bin/bash
 
-# # source environment variables for OpenStack and UCD
-# source ~/openrc
+cat << 'EOF'
+Importing UCD artifacts for docker demo...
+EOF
+
+echo -ne '                                        (0%)\r'
 
 PATTERN_NAME=docker
 DS_USERNAME=admin
@@ -9,132 +12,273 @@ DS_PASSWORD=admin
 DS_WEB_URL=http://192.168.27.100:8080
 
 # add example jke application to UCD
-curl --verbose -u $DS_USERNAME:$DS_PASSWORD -s --insecure -F "file=@/docker/plugins/docker-plugin-5.867460.zip;type=application/zip" -F "filename=docker-plugin-5.867460.zip" $DS_WEB_URL/rest/plugin/automationPlugin
-curl --verbose -u $DS_USERNAME:$DS_PASSWORD -s --insecure -F "file=@/docker/plugins/docker-compose-19.867214.zip;type=application/zip" -F "filename=docker-compose-19.867214.zip" $DS_WEB_URL/rest/plugin/automationPlugin
-curl --verbose -u $DS_USERNAME:$DS_PASSWORD -s --insecure -F "file=@/docker/plugins/cloud-foundry-ibm-containers-3.842172.zip;type=application/zip" -F "filename=cloud-foundry-ibm-containers-3.842172.zip" $DS_WEB_URL/rest/plugin/automationPlugin
-curl --verbose -u $DS_USERNAME:$DS_PASSWORD -s --insecure -F "file=@/docker/plugins/DockerSourceConfig-15.867117.zip;type=application/zip" -F "filename=DockerSourceConfig-15.867117.zip" $DS_WEB_URL/rest/plugin/sourceConfigPlugin
+curl --verbose -u $DS_USERNAME:$DS_PASSWORD -s --insecure -F "file=@/docker/plugins/docker-plugin-5.867460.zip;type=application/zip" -F "filename=docker-plugin-5.867460.zip" $DS_WEB_URL/rest/plugin/automationPlugin >> /docker/init.log 2>&1
+echo -ne '##                                      (5%)\r'
+curl --verbose -u $DS_USERNAME:$DS_PASSWORD -s --insecure -F "file=@/docker/plugins/docker-compose-19.867214.zip;type=application/zip" -F "filename=docker-compose-19.867214.zip" $DS_WEB_URL/rest/plugin/automationPlugin >> /docker/init.log 2>&1
+echo -ne '####                                    (10%)\r'
+curl --verbose -u $DS_USERNAME:$DS_PASSWORD -s --insecure -F "file=@/docker/plugins/cloud-foundry-ibm-containers-3.842172.zip;type=application/zip" -F "filename=cloud-foundry-ibm-containers-3.842172.zip" $DS_WEB_URL/rest/plugin/automationPlugin >> /docker/init.log 2>&1
+echo -ne '######                                  (15%)\r'
+curl --verbose -u $DS_USERNAME:$DS_PASSWORD -s --insecure -F "file=@/docker/plugins/DockerSourceConfig-15.867117.zip;type=application/zip" -F "filename=DockerSourceConfig-15.867117.zip" $DS_WEB_URL/rest/plugin/sourceConfigPlugin >> /docker/init.log 2>&1
+echo -ne '########                                (20%)\r'
 
-udclient createComponent /docker/docker-engine/docker-engine.json
-udclient createComponentProcess /docker/docker-engine/install+docker-engine.json
-udclient createComponentProcess /docker/docker-engine/create+new+docker+swarm.json
-udclient createComponentProcess /docker/docker-engine/join+docker+swarm+as+manager.json
-udclient createComponentProcess /docker/docker-engine/join+docker+swarm+as+worker.json
-udclient createComponentProcess /docker/docker-engine/wait.json
-udclient createVersion -component "docker-engine" -name 1.13
+# udclient createComponent /docker/docker-engine/docker-engine.json >> /docker/init.log 2>&1
+udclient createComponent /docker/docker/docker.json >> /docker/init.log 2>&1
+echo -ne '##########                              (25%)\r'
+# udclient createComponentProcess /docker/docker-engine/install+docker-engine.json >> /docker/init.log 2>&1
+udclient createComponentProcess /docker/docker/install+docker-engine.json >> /docker/init.log 2>&1
+echo -ne '############                            (30%)\r'
+# udclient createComponentProcess /docker/docker-engine/create+new+docker+swarm.json >> /docker/init.log 2>&1
+udclient createComponentProcess /docker/docker/create+consul+service.json >> /docker/init.log 2>&1
+echo -ne '##############                          (35%)\r'
+# udclient createComponentProcess /docker/docker-engine/join+docker+swarm+as+manager.json >> /docker/init.log 2>&1
+udclient createComponentProcess /docker/docker/create+swarm+manager.json >> /docker/init.log 2>&1
+echo -ne '################                        (40%)\r'
+# udclient createComponentProcess /docker/docker-engine/join+docker+swarm+as+worker.json >> /docker/init.log 2>&1
+udclient createComponentProcess /docker/docker/create+swarm+worker.json >> /docker/init.log 2>&1
+echo -ne '##################                      (50%)\r'
+# udclient createComponentProcess /docker/docker-engine/wait.json >> /docker/init.log 2>&1
+udclient createComponentProcess /docker/docker/wait+for+consul+service.json >> /docker/init.log 2>&1
+udclient createComponentProcess /docker/docker/wait+for+swarm+manager.json >> /docker/init.log 2>&1
+echo -ne '####################                    (55%)\r'
+# udclient createVersion -component "docker-engine" -name 1.13 >> /docker/init.log 2>&1
+udclient createVersion -component "docker" -name 1.13 >> /docker/init.log 2>&1
+echo -ne '######################                  (60%)\r'
 
-dockerEngineId=`udclient getComponent -component "docker-engine" | python -c \
+# dockerEngineId=`udclient getComponent -component "docker-engine" | python -c \
+# "import json; import sys;
+# data=json.load(sys.stdin); print data['id']"`
+
+dockerId=`udclient getComponent -component "docker" | python -c \
 "import json; import sys;
 data=json.load(sys.stdin); print data['id']"`
 
-curl -u $DS_USERNAME:$DS_PASSWORD \
-     -H 'Content-Type: application/json' \
-     -X PUT \
-     -d "
-  {
-    \"definitionGroupId\": \"05e2d7ed-6f7c-4b98-93d0-caedca00eb4a\",
-    \"description\": \"Docker Swarm Advertise Address\",
-    \"label\": \"Docker Swarm Advertise Address\",
-    \"name\": \"swarm-master-ip\",
-    \"pattern\": \"\",
-    \"required\": \"false\",
-    \"type\": \"TEXT\",
-    \"value\": \"\"
-  }
-" \
-""$DS_WEB_URL"/property/propSheetDef/components&"$dockerEngineId"&environmentPropSheetDef.-1/propDefs"
+echo -ne '########################                (65%)\r'
+
+# curl -u $DS_USERNAME:$DS_PASSWORD \
+#      -H 'Content-Type: application/json' \
+#      -X PUT \
+#      -d "
+#   {
+#     \"definitionGroupId\": \"05e2d7ed-6f7c-4b98-93d0-caedca00eb4a\",
+#     \"description\": \"Docker Swarm Advertise Address\",
+#     \"label\": \"Docker Swarm Advertise Address\",
+#     \"name\": \"swarm-master-ip\",
+#     \"pattern\": \"\",
+#     \"required\": \"false\",
+#     \"type\": \"TEXT\",
+#     \"value\": \"\"
+#   }
+# " \
+# ""$DS_WEB_URL"/property/propSheetDef/components&"$dockerEngineId"&environmentPropSheetDef.-1/propDefs" >> /docker/init.log 2>&1
 
 curl -u $DS_USERNAME:$DS_PASSWORD \
      -H 'Content-Type: application/json' \
      -X PUT \
      -d "
   {
-    \"definitionGroupId\": \"05e2d7ed-6f7c-4b98-93d0-caedca00eb4b\",
-    \"description\": \"Docker Swarm Manager Token\",
-    \"label\": \"Docker Swarm Manager Token\",
-    \"name\": \"swarm-manager-token\",
+    \"definitionGroupId\": \"05e2d7ed-6f7c-4b98-93d0-caedca00eb5a\",
+    \"description\": \"\",
+    \"label\": \"consul discovery ip address\",
+    \"name\": \"consul-ip\",
     \"pattern\": \"\",
     \"required\": \"false\",
     \"type\": \"TEXT\",
     \"value\": \"\"
   }
 " \
-""$DS_WEB_URL"/property/propSheetDef/components&"$dockerEngineId"&environmentPropSheetDef.-1/propDefs"
+""$DS_WEB_URL"/property/propSheetDef/components&"$dockerId"&environmentPropSheetDef.-1/propDefs" >> /docker/init.log 2>&1
+
+echo -ne '##########################              (70%)\r'
+
+# curl -u $DS_USERNAME:$DS_PASSWORD \
+#      -H 'Content-Type: application/json' \
+#      -X PUT \
+#      -d "
+#   {
+#     \"definitionGroupId\": \"05e2d7ed-6f7c-4b98-93d0-caedca00eb4b\",
+#     \"description\": \"Docker Swarm Manager Token\",
+#     \"label\": \"Docker Swarm Manager Token\",
+#     \"name\": \"swarm-manager-token\",
+#     \"pattern\": \"\",
+#     \"required\": \"false\",
+#     \"type\": \"TEXT\",
+#     \"value\": \"\"
+#   }
+# " \
+# ""$DS_WEB_URL"/property/propSheetDef/components&"$dockerEngineId"&environmentPropSheetDef.-1/propDefs" >> /docker/init.log 2>&1
 
 curl -u $DS_USERNAME:$DS_PASSWORD \
      -H 'Content-Type: application/json' \
      -X PUT \
      -d "
   {
-    \"definitionGroupId\": \"05e2d7ed-6f7c-4b98-93d0-caedca00eb4c\",
-    \"description\": \"Docker Swarm Worker Token\",
-    \"label\": \"Docker Swarm Worker Token\",
-    \"name\": \"swarm-worker-token\",
+    \"definitionGroupId\": \"05e2d7ed-6f7c-4b98-93d0-caedca00eb5b\",
+    \"description\": \"\",
+    \"label\": \"swarm manager ip address\",
+    \"name\": \"swarm-manager-ip\",
     \"pattern\": \"\",
     \"required\": \"false\",
     \"type\": \"TEXT\",
     \"value\": \"\"
   }
 " \
-""$DS_WEB_URL"/property/propSheetDef/components&"$dockerEngineId"&environmentPropSheetDef.-1/propDefs"
+""$DS_WEB_URL"/property/propSheetDef/components&"$dockerId"&environmentPropSheetDef.-1/propDefs" >> /docker/init.log 2>&1
 
-curl -u $DS_USERNAME:$DS_PASSWORD \
-     -H 'Content-Type: application/json' \
-     -X PUT \
-     -d "
-  {
-    \"definitionGroupId\": \"05e2d7ed-6f7c-4b98-93d0-caedca00eb4d\",
-    \"description\": \"Docker Swarm Public Host IP\",
-    \"label\": \"Docker Swarm Public Host IP\",
-    \"name\": \"public_ip\",
-    \"pattern\": \"\",
-    \"required\": \"false\",
-    \"type\": \"TEXT\",
-    \"value\": \"\"
-  }
-" \
-""$DS_WEB_URL"/property/propSheetDef/components&"$dockerEngineId"&environmentPropSheetDef.-1/propDefs"
+echo -ne '############################            (75%)\r'
 
-curl -u $DS_USERNAME:$DS_PASSWORD \
-     -H 'Content-Type: application/json' \
-     -X PUT \
-     -d "
-  {
-    \"definitionGroupId\": \"05e2d7ed-6f7c-4b98-93d0-caedca00eb4e\",
-    \"description\": \"Docker Swarm Public Hostname\",
-    \"label\": \"Docker Swarm Public Hostname\",
-    \"name\": \"public_hostname\",
-    \"pattern\": \"\",
-    \"required\": \"false\",
-    \"type\": \"TEXT\",
-    \"value\": \"\"
-  }
-" \
-""$DS_WEB_URL"/property/propSheetDef/components&"$dockerEngineId"&environmentPropSheetDef.-1/propDefs"
+# curl -u $DS_USERNAME:$DS_PASSWORD \
+#      -H 'Content-Type: application/json' \
+#      -X PUT \
+#      -d "
+#   {
+#     \"definitionGroupId\": \"05e2d7ed-6f7c-4b98-93d0-caedca00eb4c\",
+#     \"description\": \"Docker Swarm Worker Token\",
+#     \"label\": \"Docker Swarm Worker Token\",
+#     \"name\": \"swarm-worker-token\",
+#     \"pattern\": \"\",
+#     \"required\": \"false\",
+#     \"type\": \"TEXT\",
+#     \"value\": \"\"
+#   }
+# " \
+# ""$DS_WEB_URL"/property/propSheetDef/components&"$dockerEngineId"&environmentPropSheetDef.-1/propDefs" >> /docker/init.log 2>&1
 
-udclient createApplication /docker/docker-swarm.json
-udclient addComponentToApplication -component "docker-engine" -application docker-swarm
+echo -ne '##############################          (80%)\r'
+
+# curl -u $DS_USERNAME:$DS_PASSWORD \
+#      -H 'Content-Type: application/json' \
+#      -X PUT \
+#      -d "
+#   {
+#     \"definitionGroupId\": \"05e2d7ed-6f7c-4b98-93d0-caedca00eb4d\",
+#     \"description\": \"Docker Swarm Public Host IP\",
+#     \"label\": \"Docker Swarm Public Host IP\",
+#     \"name\": \"public_ip\",
+#     \"pattern\": \"\",
+#     \"required\": \"false\",
+#     \"type\": \"TEXT\",
+#     \"value\": \"\"
+#   }
+# " \
+# ""$DS_WEB_URL"/property/propSheetDef/components&"$dockerEngineId"&environmentPropSheetDef.-1/propDefs" >> /docker/init.log 2>&1
+
+echo -ne '################################        (85%)\r'
+
+# curl -u $DS_USERNAME:$DS_PASSWORD \
+#      -H 'Content-Type: application/json' \
+#      -X PUT \
+#      -d "
+#   {
+#     \"definitionGroupId\": \"05e2d7ed-6f7c-4b98-93d0-caedca00eb4e\",
+#     \"description\": \"Docker Swarm Public Hostname\",
+#     \"label\": \"Docker Swarm Public Hostname\",
+#     \"name\": \"public_hostname\",
+#     \"pattern\": \"\",
+#     \"required\": \"false\",
+#     \"type\": \"TEXT\",
+#     \"value\": \"\"
+#   }
+# " \
+# ""$DS_WEB_URL"/property/propSheetDef/components&"$dockerEngineId"&environmentPropSheetDef.-1/propDefs" >> /docker/init.log 2>&1
+
+echo -ne '##################################      (90%)\r'
+
+# udclient createApplication /docker/docker-swarm-mode.json >> /docker/init.log 2>&1
+udclient createApplication /docker/docker-swarm.json >> /docker/init.log 2>&1
+echo -ne '####################################    (95%)\r'
+# udclient addComponentToApplication -component "docker-engine" -application docker-swarm-mode >> /docker/init.log 2>&1
+udclient addComponentToApplication -component "docker" -application docker-swarm >> /docker/init.log 2>&1
+echo -ne '######################################  (100%)\r'
+
+mkdir -p /compose/demo-docker
+cat > /compose/demo-docker/docker-compose.yml <<'EOF'
+version: '2'
+services:
+
+  registry:
+    image: registry:2
+    restart: always
+    ports:
+      - "5555:5000"
+    environment:
+      REGISTRY_STORAGE_FILESYSTEM_ROOTDIRECTORY: /data
+    volumes:
+      - ./data/registry:/data
+  registry-frontend:
+    image: konradkleine/docker-registry-frontend:v2
+    ports:
+      - "411:80"
+    environment:
+      - ENV_DOCKER_REGISTRY_HOST=registry
+      - ENV_DOCKER_REGISTRY_PORT=5000
+    links:
+      - registry
+    depends_on:
+      - registry
+  gogs:
+    image: gogs/gogs:latest
+    ports:
+     - "3000:3000"
+     - "10022:22"
+    restart: always
+    privileged: true
+    volumes:
+     - ./data:/data
+  drone-server:
+    image: drone/drone:0.5
+    ports:
+      - "9000:8000"
+    restart: always
+    privileged: true
+    environment:
+      - DRONE_OPEN=true
+      - DRONE_GOGS=true
+      - DRONE_GOGS_URL=http://gogs:3000
+      - DRONE_GOGS_PRIVATE_MODE=false
+      - DRONE_GOGS_SKIP_VERIFY=true
+      - DRONE_SECRET=passw0rd
+      - DRONE_DEBUG=true
+      - DRONE_BROKER_DEBUG=true
+    volumes:
+      - "./drone:/var/lib/drone"
+    links:
+      - gogs
+  drone-agent:
+    image: drone/drone:0.5
+    command: agent
+    restart: always
+    privileged: true
+    depends_on:
+      - drone-server
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    environment:
+      - DRONE_SERVER=ws://drone-server:8000/ws/broker
+      - DRONE_SECRET=passw0rd
+      - DRONE_PLUGIN_PRIVILEGED=plugins/docker,plugins/docker:*,plugins/drone-docker:*
+      - DRONE_DEBUG=true
+  drone-wall:
+    image: drone/drone-wall
+    restart: always
+    ports:
+      - "9001:80"
+EOF
+
+cat << 'EOF'
+Pulling and running docker images for docker demo...
+EOF
+
+cd /compose/demo-docker
+docker-compose up -d
+
 
 cat << 'EOF'
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-From the Blueprint Designer (http://designer.stackinabox.io:9080/landscaper/view/repositories)
-clone the GitHub repo: https://github.com/tpouyer/swarm-blueprint.git (https://github.com/tpouyer/swarm-blueprint)
-into stackinabox.  You can then provision the "docker-swarm.yml" blueprint from the "swarm-blueprint" folder using
-the "ubuntu-16.04-amd64" image for the Manager and Worker nodes.
 
-Once deployed you can test the docker swarm using the commands below from the stackinabox console 
-(http://console.stackinabox.io:4200  username: demo  password: labstack)
+SUCCESS!!!
 
-# download and setup client_bundle.tgz
-scp -i demo_key ubuntu@%Public_Docker_Host%:~/client_bundle.tgz ~/
-tar -xvf ~/client_bundle.tgz -C ~/
-~/.docker/setup_hosts.sh
-source ~/.docker/dockerc
-
-# test swarm connectivity
-docker version
-
-# view list of existing nodes in swarm
-docker node ls
+To get started follow the tutorial steps here:
+https://github.com/stackinabox/docker-demo-docker/wiki/Docker-Demo-for-Stackinabox.io
 
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 EOF

@@ -1,0 +1,104 @@
+{
+    "name": "create consul service",
+    "component": "docker",
+    "description": "",
+    "defaultWorkingDir": "${p:resource\/work.dir}\/${p:component.name}",
+    "takesVersion": false,
+    "status": "Active",
+    "active": true,
+    "path": "components\/8855d042-6bae-4886-a1ae-f3dbf19f41ee\/processes\/6307a67c-29cf-4e54-a5c8-a2c4915b7d6c",
+    "propDefs": [],
+    "rootActivity": {
+        "edges": [
+            {
+                "to": "set consul ip",
+                "from": "create consul service",
+                "type": "SUCCESS",
+                "value": ""
+            },
+            {
+                "to": "b1f8a847e5c7a26f1269cafa2616c4",
+                "from": "set consul ip",
+                "type": "SUCCESS",
+                "value": ""
+            },
+            {
+                "to": "create consul service",
+                "type": "ALWAYS",
+                "value": ""
+            }
+        ],
+        "offsets": [
+            {
+                "name": "b1f8a847e5c7a26f1269cafa2616c4",
+                "x": -5,
+                "y": 420,
+                "h": 80,
+                "w": 120
+            },
+            {
+                "name": "create consul service",
+                "x": -60,
+                "y": 175.10204081632654,
+                "h": 70,
+                "w": 230
+            },
+            {
+                "name": "set consul ip",
+                "x": -134.99999999999994,
+                "y": 290,
+                "h": 70,
+                "w": 380
+            }
+        ],
+        "layoutMode": "manual",
+        "type": "graph",
+        "name": "6739cabb-25bf-4600-b70a-d8430be99324",
+        "children": [
+            {
+                "type": "finish",
+                "name": "b1f8a847e5c7a26f1269cafa2616c4",
+                "children": []
+            },
+            {
+                "allowFailure": false,
+                "useImpersonation": false,
+                "showHidden": false,
+                "impersonationUseSudo": false,
+                "commandName": "Shell",
+                "pluginName": "Shell",
+                "pluginVersion": 7,
+                "properties": {
+                    "directoryOffset": ".",
+                    "shellInterpreter": "",
+                    "scriptBody": "#!\/bin\/bash\n\ndocker run -d -p 8500:8500 --name=consul progrium\/consul -server -bootstrap -advertise=${p:agent\/ip}",
+                    "runAsDaemon": "false",
+                    "outputFile": ""
+                },
+                "type": "plugin",
+                "name": "create consul service",
+                "children": []
+            },
+            {
+                "allowFailure": false,
+                "useImpersonation": false,
+                "showHidden": false,
+                "impersonationUseSudo": false,
+                "commandName": "Set Component Environment Property",
+                "pluginName": "IBM UrbanCode Deploy Environments",
+                "pluginVersion": 72,
+                "properties": {
+                    "component": "${p:component.id}",
+                    "environment": "${p:environment.id}",
+                    "application": "${p:application.id}",
+                    "name": "consul-ip",
+                    "value": "${p:agent\/ip}",
+                    "isSecure": "false"
+                },
+                "type": "plugin",
+                "name": "set consul ip",
+                "children": []
+            }
+        ]
+    }
+}

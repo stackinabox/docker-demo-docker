@@ -1,0 +1,120 @@
+{
+    "name": "wait for swarm manager",
+    "component": "docker",
+    "description": "",
+    "defaultWorkingDir": "${p:resource\/work.dir}\/${p:component.name}",
+    "takesVersion": false,
+    "status": "Active",
+    "active": true,
+    "path": "components\/8855d042-6bae-4886-a1ae-f3dbf19f41ee\/processes\/8df68ade-9e08-4c50-be8c-1f1272e307d5",
+    "propDefs": [],
+    "rootActivity": {
+        "edges": [
+            {
+                "to": "test swarm-manager-ip",
+                "from": "GetProperties",
+                "type": "SUCCESS",
+                "value": ""
+            },
+            {
+                "to": "0488d9403b2a93ec812481e0eb4e17",
+                "from": "Wait",
+                "type": "SUCCESS",
+                "value": ""
+            },
+            {
+                "to": "0488d9403b2a93ec812481e0eb4e17",
+                "from": "test swarm-manager-ip",
+                "type": "VALUE",
+                "value": "*.*.*.*"
+            },
+            {
+                "to": "GetProperties",
+                "type": "ALWAYS",
+                "value": ""
+            },
+            {
+                "to": "Wait",
+                "from": "test swarm-manager-ip",
+                "type": "VALUE",
+                "value": ""
+            }
+        ],
+        "offsets": [
+            {
+                "name": "0488d9403b2a93ec812481e0eb4e17",
+                "x": -4.999999999999943,
+                "y": 650,
+                "h": 90,
+                "w": 130
+            },
+            {
+                "name": "test swarm-manager-ip",
+                "x": -154.99999999999997,
+                "y": 320,
+                "h": 80,
+                "w": 430
+            },
+            {
+                "name": "Wait",
+                "x": -275,
+                "y": 490,
+                "h": 80,
+                "w": 180
+            },
+            {
+                "name": "GetProperties",
+                "x": -175.00000000000014,
+                "y": 190,
+                "h": 80,
+                "w": 470
+            }
+        ],
+        "layoutMode": "manual",
+        "type": "graph",
+        "name": "781bff8c-9ee6-4dae-9595-6a617832fd83",
+        "children": [
+            {
+                "type": "finish",
+                "name": "0488d9403b2a93ec812481e0eb4e17",
+                "children": []
+            },
+            {
+                "allowFailure": false,
+                "useImpersonation": false,
+                "showHidden": false,
+                "impersonationUseSudo": false,
+                "commandName": "Wait",
+                "pluginName": "General Utilities",
+                "pluginVersion": 1,
+                "properties": {"duration": "240"},
+                "type": "plugin",
+                "name": "Wait",
+                "children": []
+            },
+            {
+                "allowFailure": false,
+                "useImpersonation": false,
+                "showHidden": false,
+                "impersonationUseSudo": false,
+                "commandName": "Get Component Environment Properties",
+                "pluginName": "IBM UrbanCode Deploy Environments",
+                "pluginVersion": 72,
+                "properties": {
+                    "application": "${p:application.id}",
+                    "environment": "${p:environment.id}",
+                    "component": "${p:component.id}"
+                },
+                "type": "plugin",
+                "name": "GetProperties",
+                "children": []
+            },
+            {
+                "propertyName": "GetProperties\/swarm-manager-ip",
+                "type": "switch",
+                "name": "test swarm-manager-ip",
+                "children": []
+            }
+        ]
+    }
+}

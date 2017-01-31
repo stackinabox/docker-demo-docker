@@ -14,10 +14,10 @@ To build:
 docker build -t stackinabox/demo-docker:%version.number% .
 ```
 
-To use: (you need to have stackinabox.io running locally)
+To use: (you need to be logged into the [stackinabox.io vm](http://shell.stackinabox.io) running locally as demo/labstack)
 
 ```
-docker run --rm stackinabox/demo-docker:1.0 /docker/init
+docker run --rm -v /vagrant/compose:/compose -v /var/run/docker.sock:/var/run/docker.sock stackinabox/demo-docker:dev
 ```
 
 

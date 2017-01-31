@@ -1,0 +1,120 @@
+{
+    "name": "wait for consul service",
+    "component": "docker",
+    "description": "",
+    "defaultWorkingDir": "${p:resource\/work.dir}\/${p:component.name}",
+    "takesVersion": false,
+    "status": "Active",
+    "active": true,
+    "path": "components\/8855d042-6bae-4886-a1ae-f3dbf19f41ee\/processes\/44a71594-77b4-48f8-b119-d101b22d91cf",
+    "propDefs": [],
+    "rootActivity": {
+        "edges": [
+            {
+                "to": "Wait",
+                "from": "test consul-ip",
+                "type": "VALUE",
+                "value": ""
+            },
+            {
+                "to": "0488d9403b2a93ec812481e0eb4e17",
+                "from": "test consul-ip",
+                "type": "VALUE",
+                "value": "*.*.*.*"
+            },
+            {
+                "to": "test consul-ip",
+                "from": "GetProperties",
+                "type": "SUCCESS",
+                "value": ""
+            },
+            {
+                "to": "0488d9403b2a93ec812481e0eb4e17",
+                "from": "Wait",
+                "type": "SUCCESS",
+                "value": ""
+            },
+            {
+                "to": "GetProperties",
+                "type": "ALWAYS",
+                "value": ""
+            }
+        ],
+        "offsets": [
+            {
+                "name": "test consul-ip",
+                "x": -119.99999999999991,
+                "y": 330,
+                "h": 80,
+                "w": 360
+            },
+            {
+                "name": "GetProperties",
+                "x": -175.00000000000014,
+                "y": 190,
+                "h": 80,
+                "w": 470
+            },
+            {
+                "name": "Wait",
+                "x": -275,
+                "y": 490,
+                "h": 80,
+                "w": 180
+            },
+            {
+                "name": "0488d9403b2a93ec812481e0eb4e17",
+                "x": -4.999999999999943,
+                "y": 650,
+                "h": 90,
+                "w": 130
+            }
+        ],
+        "layoutMode": "manual",
+        "type": "graph",
+        "name": "19de0a40-5af8-45b7-bfff-684465e32a86",
+        "children": [
+            {
+                "type": "finish",
+                "name": "0488d9403b2a93ec812481e0eb4e17",
+                "children": []
+            },
+            {
+                "allowFailure": false,
+                "useImpersonation": false,
+                "showHidden": false,
+                "impersonationUseSudo": false,
+                "commandName": "Wait",
+                "pluginName": "General Utilities",
+                "pluginVersion": 1,
+                "properties": {"duration": "120"},
+                "type": "plugin",
+                "name": "Wait",
+                "children": []
+            },
+            {
+                "allowFailure": false,
+                "useImpersonation": false,
+                "showHidden": false,
+                "impersonationUseSudo": false,
+                "commandName": "Get Component Environment Properties",
+                "pluginName": "IBM UrbanCode Deploy Environments",
+                "pluginVersion": 72,
+                "properties": {
+                    "application": "${p:application.id}",
+                    "environment": "${p:environment.id}",
+                    "component": "${p:component.id}"
+                },
+                "type": "plugin",
+                "name": "GetProperties",
+                "children": []
+            },
+            {
+                "propertyName": "GetProperties\/consul-ip",
+                "type": "switch",
+                "name": "test consul-ip",
+                "children": []
+            }
+        ]
+    }
+}
